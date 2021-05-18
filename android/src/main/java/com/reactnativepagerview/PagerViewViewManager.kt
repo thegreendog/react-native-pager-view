@@ -16,6 +16,8 @@ import com.facebook.react.uimanager.events.EventDispatcher
 import com.reactnativepagerview.event.PageScrollEvent
 import com.reactnativepagerview.event.PageScrollStateChangedEvent
 import com.reactnativepagerview.event.PageSelectedEvent
+import com.reactnativepagerview.utils.recyclerView
+import com.reactnativepagerview.utils.enforceSingleScrollDirection
 
 
 class PagerViewViewManager : ViewGroupManager<ViewPager2>() {
@@ -27,6 +29,7 @@ class PagerViewViewManager : ViewGroupManager<ViewPager2>() {
 
   override fun createViewInstance(reactContext: ThemedReactContext): ViewPager2 {
     val vp = ViewPager2(reactContext)
+    vp.recyclerView.enforceSingleScrollDirection()
     val adapter = FragmentAdapter((reactContext.currentActivity as FragmentActivity?)!!)
     vp.adapter = adapter
     //https://github.com/callstack/react-native-viewpager/issues/183
