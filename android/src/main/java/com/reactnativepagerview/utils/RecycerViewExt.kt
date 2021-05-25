@@ -19,7 +19,7 @@ fun RecyclerView.enforceSingleScrollDirection() {
 }
 
 private class SingleScrollDirectionEnforcer : RecyclerView.OnScrollListener(), OnItemTouchListener {
-
+    private var prevScrollState = RecyclerView.SCROLL_STATE_IDLE
     private var scrollState = RecyclerView.SCROLL_STATE_IDLE
     private var scrollPointerId = -1
     private var initialTouchX = 0
@@ -58,9 +58,9 @@ private class SingleScrollDirectionEnforcer : RecyclerView.OnScrollListener(), O
     override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
 
     override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-        val oldState = scrollState
+        prevScrollState = scrollState
         scrollState = newState
-        if (oldState == RecyclerView.SCROLL_STATE_IDLE && newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+        if (prevScrollState == RecyclerView.SCROLL_STATE_IDLE && newState == RecyclerView.SCROLL_STATE_DRAGGING) {
             recyclerView.layoutManager?.let { layoutManager ->
                 val canScrollHorizontally = layoutManager.canScrollHorizontally()
                 val canScrollVertically = layoutManager.canScrollVertically()
@@ -69,6 +69,13 @@ private class SingleScrollDirectionEnforcer : RecyclerView.OnScrollListener(), O
                             || (canScrollVertically && abs(dx) > abs(dy))) {
                         recyclerView.stopScroll()
                     }
+                }
+            }
+        } else if (prevScrollState == RecyclerView.SCROLL_STATE_SETTLING && newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+            recyclerView.layoutManager?.let { layoutManager ->
+                if (layoutManager.canScrollHorizontally()) {
+                    recyclerView.stopScroll()
+                    recyclerView.smoothScrollToPosition((recyclerView.parent as ViewPager2).currentItem)
                 }
             }
         }
